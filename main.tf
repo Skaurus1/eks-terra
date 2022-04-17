@@ -74,16 +74,4 @@ module "eks" {
     }
 
   }
-
-  # Fargate Profile(s)
-  fargate_profiles = {
-    default = {
-      name = "default"
-      selectors = [
-        {
-          namespace = "default"
-        }
-      ]
-    }
-  }
 }
