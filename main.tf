@@ -53,6 +53,7 @@ module "eks" {
     vpc-cni = {
       resolve_conflicts = "OVERWRITE"
     }
+  }
 
   eks_managed_node_groups = {
       blue = {
