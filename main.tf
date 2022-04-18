@@ -12,13 +12,12 @@ provider "aws" {
 }
 
 provider "helm" {
-  alias = "helm"
   kubernetes {
     host                   = data.aws_eks_cluster.cluster.endpoint
     cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
     exec {
       api_version = "client.authentication.k8s.io/v1alpha1"
-      args        = ["eks", "get-token", "--cluster-name", data.aws_eks_cluster.cluster.name]
+      args        = ["eks", "get-token", "--cluster-name", var.k8s.cluster_name]
       command     = "aws"
     }
   }
@@ -86,11 +85,12 @@ module "eks" {
   }
 }
 
-resource "helm_release" "CALICO" {
-  name       = "calico"
+resource "helm_release" "tigera-operator" {
+  name       = "tigera-operator"
 
-  repository = "https://projectcalico.docs.tigera.io/charts"
-  chart      = "projectcalico/tigera-operator"
+  repository = "https://docs.projectcalico.org/charts"
+  chart      = "tigera-operator"
+  version    = "v3.21.1"
 
   set {
     name  = "CALICO_IPV4POOL_CIDR"
