@@ -11,6 +11,19 @@ provider "aws" {
   region = var.region
 }
 
+provider "helm" {
+  alias = "helm"
+  kubernetes {
+    host                   = data.aws_eks_cluster.cluster.endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.cluster.certificate_authority.0.data)
+    exec {
+      api_version = "client.authentication.k8s.io/v1alpha1"
+      args        = ["eks", "get-token", "--cluster-name", data.aws_eks_cluster.cluster.name]
+      command     = "aws"
+    }
+  }
+}
+
 data "aws_eks_cluster" "cluster" {
   name = module.eks.cluster_id
 }
@@ -50,9 +63,6 @@ module "eks" {
       resolve_conflicts = "OVERWRITE"
     }
     kube-proxy = {}
-    vpc-cni = {
-      resolve_conflicts = "OVERWRITE"
-    }
   }
 
   eks_managed_node_groups = {
@@ -73,5 +83,17 @@ module "eks" {
       capacity_type  = var.k8s.capacity_type
     }
 
+  }
+}
+
+resource "helm_release" "CALICO" {
+  name       = "calico"
+
+  repository = "https://projectcalico.docs.tigera.io/charts"
+  chart      = "projectcalico/tigera-operator"
+
+  set {
+    name  = "CALICO_IPV4POOL_CIDR"
+    value = "192.168.0.0/16"
   }
 }
