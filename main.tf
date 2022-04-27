@@ -90,10 +90,10 @@ resource "helm_release" "tigera-operator" {
 
   repository = "https://docs.projectcalico.org/charts"
   chart      = "tigera-operator"
-  version    = "v3.21.1"
+  version    = "v3.22.2"
 
-  set {
-    name  = "CALICO_IPV4POOL_CIDR"
-    value = "192.168.0.0/16"
-  }
+  values = [
+    file("${path.module}/calico.yaml")
+  ]
+
 }
